@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>영어 단어 시험 시스템</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 800px;
+            width: 100%;
+            padding: 30px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .file-selection {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        select, input[type="file"], button {
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        select:focus, input[type="file"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        button:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        #quiz-container {
+            display: none;
+        }
+        
+        .quiz-question {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .quiz-question.wrong {
+            background: #fee;
+            border-color: #f88;
+        }
+        
+        .quiz-question.correct {
+            background: #efe;
+            border-color: #8f8;
+        }
+        
+        .question-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .question-number {
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .first-letter {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .meaning {
+            flex: 1;
+            color: #666;
+        }
+        
+        .answer-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .answer-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        #results {
+            display: none;
+            text-align: center;
+        }
+        
+        .score-display {
+            font-size: 48px;
+            color: #667eea;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        
+        .wrong-answers {
+            text-align: left;
+            margin-top: 30px;
+        }
+        
+        .wrong-answer-item {
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-left: 4px solid #ff6b6b;
+            border-radius: 5px;
+        }
+        
+        .correct-answer {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .user-answer {
+            color: #dc3545;
+            text-decoration: line-through;
+        }
+        
+        .timer {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            font-size: 20px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .timer.warning {
+            right: 50%;
+            transform: translateX(50%);
+            background: #ff6b6b;
+            color: white;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: translateX(50%) scale(1); }
+            50% { transform: translateX(50%) scale(1.1); }
+            100% { transform: translateX(50%) scale(1); }
+        }
+
+        .timeout-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .timeout-popup {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .timeout-popup h2 {
+            color: #ff6b6b;
+            margin-bottom: 20px;
+        }
+
+        .timeout-popup button {
+            padding: 15px 40px;
+            font-size: 18px;
+        }
+
+        .all-answers {
+            margin-top: 30px;
+        }
+
+        .answer-item {
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .answer-item.correct {
+            border-left: 4px solid #28a745;
+        }
+
+        .answer-item.wrong {
+            border-left: 4px solid #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="timer" id="timer" style="display: none;">00:00</div>
+    
+    <div class="container">
+        <h1>🎯 영어 단어 시험</h1>
+        
+        <div id="file-selector" class="section">
+            <h2>단어장 선택</h2>
+            <div class="file-selection">
+                <select id="csv-select">
+                    <option value="">단어장을 선택하세요</option>
+                </select>
+                <input type="file" id="file-upload" accept=".csv">
+                <button id="upload-btn">업로드</button>
+                <button id="start-quiz">시험 시작</button>
+            </div>
+        </div>
+        
+        <div id="quiz-container">
+            <div id="quiz-questions"></div>
+            <button id="submit-quiz">제출하기</button>
+        </div>
+
+        <div class="timeout-overlay" id="timeout-overlay">
+            <div class="timeout-popup">
+                <h2>⏰ 시험 시간이 종료되었습니다!</h2>
+                <p>6분이 경과하여 시험이 자동 종료됩니다.</p>
+                <button id="force-submit">시험 제출</button>
+            </div>
+        </div>
+        
+        <div id="results">
+            <h2>시험 결과</h2>
+            <div class="score-display" id="score-display">0/0</div>
+            <p id="percentage">0%</p>
+            <div id="wrong-answers" class="wrong-answers"></div>
+            <button id="retry-quiz">다시 시험보기</button>
+            <button id="new-quiz">새 시험 선택</button>
+        </div>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>
