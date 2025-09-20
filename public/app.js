@@ -106,7 +106,10 @@ function displayQuiz() {
     document.getElementById('file-selector').style.display = 'none';
     document.getElementById('quiz-container').style.display = 'block';
     document.getElementById('results').style.display = 'none';
-    
+
+    // 제출 버튼 다시 활성화
+    document.getElementById('submit-quiz').disabled = false;
+
     const container = document.getElementById('quiz-questions');
     container.innerHTML = '';
     
@@ -286,6 +289,7 @@ function displayResults(result) {
 
 function retryQuiz() {
     isTimeUp = false;
+    document.getElementById('submit-quiz').disabled = false;
     startQuiz();
 }
 
