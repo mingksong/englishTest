@@ -137,16 +137,79 @@ function displayQuiz() {
     
     const inputs = document.querySelectorAll('.answer-input');
     inputs.forEach((input, index) => {
+        // IME 모드 비활성화 (영어 입력만 가능)
+        input.style.imeMode = 'disabled';
+        input.setAttribute('lang', 'en');
+        input.setAttribute('autocomplete', 'off');
+        input.setAttribute('autocorrect', 'off');
+        input.setAttribute('autocapitalize', 'off');
+        input.setAttribute('spellcheck', 'false');
+
+        // 한글 입력 방지 - compositionstart 이벤트로 IME 입력 차단
+        input.addEventListener('compositionstart', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        });
+
+        // 한글 입력 방지 - compositionupdate 이벤트로 IME 입력 차단
+        input.addEventListener('compositionupdate', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        });
+
+        // keydown 이벤트로 한글 입력 차단
+        input.addEventListener('keydown', (e) => {
+            // 한글 키 코드 범위 차단 (한글 자음/모음)
+            if (e.keyCode === 229) {
+                e.preventDefault();
+                return false;
+            }
+        });
+
         input.addEventListener('keypress', (e) => {
+            // 영문자, 숫자, 공백, 하이픈, 백스페이스, 엔터만 허용
+            const char = String.fromCharCode(e.which || e.keyCode);
+            if (!/[a-zA-Z0-9\s\-]/.test(char) && e.key !== 'Enter' && e.key !== 'Backspace') {
+                e.preventDefault();
+                return false;
+            }
+
             if (e.key === 'Enter' && index < inputs.length - 1) {
                 inputs[index + 1].focus();
             }
         });
-        
-        input.addEventListener('input', () => {
+
+        input.addEventListener('input', (e) => {
+            // 입력된 값에서 영문자, 숫자, 공백, 하이픈만 남기기
+            const value = e.target.value;
+            const englishOnly = value.replace(/[^a-zA-Z0-9\s\-]/g, '');
+            if (value !== englishOnly) {
+                e.target.value = englishOnly;
+            }
+
             if (isTimeUp) {
                 input.value = '';
                 input.disabled = true;
+            }
+        });
+
+        // 붙여넣기 시에도 한글 제거
+        input.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const clipboardData = e.clipboardData || window.clipboardData;
+            if (clipboardData) {
+                const paste = clipboardData.getData('text');
+                const englishOnly = paste.replace(/[^a-zA-Z0-9\s\-]/g, '');
+                // input 요소에 직접 값 설정
+                const start = input.selectionStart || 0;
+                const end = input.selectionEnd || 0;
+                const currentValue = input.value;
+                input.value = currentValue.substring(0, start) + englishOnly + currentValue.substring(end);
+                // 커서 위치 조정
+                const newPosition = start + englishOnly.length;
+                input.setSelectionRange(newPosition, newPosition);
             }
         });
     });
