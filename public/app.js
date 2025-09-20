@@ -119,11 +119,15 @@ function displayQuiz() {
                 <div class="first-letter">${question.firstLetter}</div>
                 <div class="meaning">${question.meaning}</div>
             </div>
-            <input type="text" 
-                   class="answer-input" 
-                   id="answer-${index}" 
+            <input type="text"
+                   class="answer-input"
+                   id="answer-${index}"
                    placeholder="전체 단어를 입력하세요"
-                   data-index="${index}">
+                   data-index="${index}"
+                   autocomplete="off"
+                   autocorrect="off"
+                   autocapitalize="off"
+                   spellcheck="false">
         `;
         container.appendChild(div);
     });

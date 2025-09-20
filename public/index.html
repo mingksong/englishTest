@@ -87,13 +87,26 @@
         #quiz-container {
             display: none;
         }
+
+        #quiz-questions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            #quiz-questions {
+                grid-template-columns: 1fr;
+            }
+        }
         
         .quiz-question {
-            margin-bottom: 20px;
             padding: 15px;
             background: white;
             border-radius: 8px;
             border: 1px solid #e0e0e0;
+            height: fit-content;
         }
         
         .quiz-question.wrong {
@@ -285,8 +298,10 @@
         </div>
         
         <div id="quiz-container">
-            <div id="quiz-questions"></div>
-            <button id="submit-quiz">제출하기</button>
+            <form id="quiz-form" autocomplete="off">
+                <div id="quiz-questions"></div>
+                <button type="button" id="submit-quiz">제출하기</button>
+            </form>
         </div>
 
         <div class="timeout-overlay" id="timeout-overlay">
